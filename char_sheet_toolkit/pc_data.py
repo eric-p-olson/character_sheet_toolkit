@@ -23,12 +23,12 @@ def etree_to_dict(t):
                 dd[k].append(v)
         d = {t.tag: {k: v[0] if len(v) == 1 else v
                      for k, v in dd.items()}}
-    if t.attrib:
+    if isinstance(d[t.tag], dict):
         d[t.tag].update(('@' + k, v)
                         for k, v in t.attrib.items())
     if t.text:
         text = t.text.strip()
-        if children or t.attrib:
+        if isinstance(d[t.tag], dict):
             if text:
                 d[t.tag]['#text'] = text
         else:
@@ -38,8 +38,10 @@ def etree_to_dict(t):
 
 def convert_to_int(string):
     """convert bool/int string to int"""
-    if string == 'True': return 1
-    if string == 'False': return 0
+    if string == 'True':
+        return 1
+    if string == 'False':
+        return 0
     try:
         return int(string)
     except ValueError:
@@ -58,6 +60,7 @@ class PCData:
 
     def read_xml(self, xml_filename):
         self.xml_filename = xml_filename
+        print(f"CHK - reading XML: {xml_filename}")
         self.xml_tree = pc_xml_fromfile(xml_filename)
         base_type, sub_type = get_fg_xml_schema(self.xml_tree)
         self.format = f"{base_type}_{sub_type}"
